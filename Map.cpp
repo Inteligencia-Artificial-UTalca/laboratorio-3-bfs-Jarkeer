@@ -1,18 +1,36 @@
 #include "Map.h"
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 Map::Map():h(0),w(0){
 
 }
 
 Map::Map(std::string filename){
+    // Cargar el archivo
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error al abrir el mapa: " << filename << std::endl;
+        exit(1);
+    }
+
+    // Guardar la informacion (primero alto y ancho)
+    file >> h >> w;
+
+    // Redimensionar el mapa
+    _map.resize(h, std::vector<int>(w));
     
-    //Load the file
-    //Resize map
-    //Save file information in map
-    //Close file
-}   
+    
+    char c;
+    for (int i = 0; i < h; ++i) {
+        for (int j = 0; j < w; ++j) {
+            file >> c; // file >> char ignora espacios y saltos de linea automaticamente
+            _map[i][j] = c - '0'; 
+        }
+    }
+    file.close();
+}
 
 Map::Map(const Map& rhs):h(rhs.h),w(rhs.w),_map(rhs._map){
 

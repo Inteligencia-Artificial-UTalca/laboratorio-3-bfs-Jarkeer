@@ -4,7 +4,7 @@
 
 class Map{
 
-protected:
+public:
     int h;
     int w;
     std::vector<std::vector<int>> _map;
