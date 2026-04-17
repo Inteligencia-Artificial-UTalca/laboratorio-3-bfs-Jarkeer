@@ -17,5 +17,7 @@ public:
     static std::vector<std::pair<int, int>> Greedy(const Map& map, std::pair<int, int> start, std::pair<int, int> goal);
     static float Heuristic(std::pair<int, int> start, std::pair<int, int> goal);
 
+    static std::vector<std::pair<int,int>> AStart(const Map& map, std::pair<int,int> start, std::pair<int,int> goal);
+
 };
 #endif

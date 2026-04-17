@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
     ColorMap colorMap(map);
     colorMap.print();
 
-    auto path = Search::BFS(map,{x1, y1}, {x2, y2}); 
+    auto path = Search::AStart(map,{x1, y1}, {x2, y2}); 
     colorMap.print(path);
     
     //Calculate path distance

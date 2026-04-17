@@ -1,5 +1,4 @@
-
-
+// Javier Molina 
 #include "Search.h"
 #include <queue>
 #include <chrono>
@@ -158,7 +157,7 @@ std::vector<std::pair<int, int>> Search::Greedy(const Map& map, std::pair<int, i
         }
 
         for(auto dir : dirs) {
-            // Correccion de typo: pos.firts a pos.first
+            
             std::pair<int,int> next = {pos.first + dir.first, pos.second + dir.second}; 
 
             // Validar limites
@@ -176,4 +175,87 @@ std::vector<std::pair<int, int>> Search::Greedy(const Map& map, std::pair<int, i
     }
     std::cout << "NOT FOUND!!!!\n";
     return {start, goal};
+}
+
+struct NodeAStart
+{
+    std:: pair<int, int> pos;
+    float f;
+
+    bool operator>(const NodeAStart& other) const{
+        return f > other.f;
+    }
+};
+
+std::vector<std::pair<int,int>> Search::AStart(const Map& map, std::pair<int,int> start, std::pair<int,int> goal)
+{
+    std::cout << "===========================\nRunning A*...\n";
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    std::vector<std::pair<int,int>> dirs{{-1,0}, {0,1}, {1,0}, {0,-1}};
+
+    std::vector<std::vector<float>> gCost(map.h, std::vector<float>(map.w, std::numeric_limits<float>::infinity()));
+    std::vector<std::vector<bool>> closed(map.h, std::vector<bool>(map.w, false));
+
+    std::priority_queue<NodeAStart, std::vector<NodeAStart>, std::greater<NodeAStart>> OPEN;
+    std::unordered_map<std::pair<int,int>, std::pair<int,int>> pathCache;
+
+    // Iniciar nodo de inicio
+    gCost[start.first][start.second] = 0;  
+    float hStart = Heuristic(start, goal);
+    OPEN.push({start, hStart});
+
+    while(!OPEN.empty())
+    {
+        auto current = OPEN.top();
+        OPEN.pop();
+        auto pos = current.pos;
+
+        // Si ya lo procesamos, lo saltamos
+        if (closed[pos.first][pos.second]) continue;
+        closed[pos.first][pos.second] = true;
+
+        // Verificamos si llegamos a la meta
+        if(pos == goal)
+        {
+            auto endTime = std::chrono::high_resolution_clock::now();
+            int count = 0;
+            for(int i = 0; i < map.h; i++)
+                for(int j = 0; j < map.w; j++)
+                    if (closed[i][j]) count++;
+
+            std::cout << "VISITED: " << count << std::endl;
+            std::cout << "OPEN: " << OPEN.size() << std::endl;
+            std::cout << "FOUND in " << std::chrono::duration<double, std::milli>(endTime - startTime).count() << "ms\n";
+            return reconstruct(pathCache, pos);
+        }
+
+        // Exploramos los 4 vecinos  
+        for(auto dir : dirs)
+        {
+            std::pair<int,int> next = {pos.first + dir.first, pos.second + dir.second};
+
+            if (next.first < 0 || next.first >= map.h || next.second < 0 || next.second >= map.w)
+                continue;
+
+            if (map._map[next.first][next.second] == 1 || closed[next.first][next.second])
+                continue;
+
+            float newG = gCost[pos.first][pos.second] + 1;
+
+            if(newG < gCost[next.first][next.second])
+            {
+                gCost[next.first][next.second] = newG;
+                float h = Heuristic(next, goal);
+                float f = newG + h;
+
+                pathCache[next] = pos;
+                OPEN.push({next, f});
+            }
+        }
+    }
+
+    std::cout << "NOT FOUND!!!!\n";
+    return {start, goal};
+
 }
